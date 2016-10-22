@@ -975,12 +975,11 @@ ReactDOMComponent.Mixin = {
           }
         }
         this._previousStyleCopy = null;
-      } else if (registrationNameModules.hasOwnProperty(propKey)) {
-        if (lastProps[propKey]) {
-          // Only call deleteListener if there was a listener previously or
-          // else willDeleteListener gets called when there wasn't actually a
-          // listener (e.g., onClick={null})
-          deleteListener(this, propKey);
+      } else if (typeof lastProps[propKey] === 'function') {
+        deleteListener(this, propKey);
+      } else if (isCustomComponentTag) {
+        if (DOMProperty.isReservedProp(propKey) === false) {
+          DOMPropertyOperations.deleteValueForAttribute(getNode(this),propKey);
         }
       } else {
         DOMPropertyOperations.deleteValueForProperty(getNode(this), propKey);
@@ -1032,7 +1031,7 @@ ReactDOMComponent.Mixin = {
           // Relies on `updateStylesByID` not mutating `styleUpdates`.
           styleUpdates = nextProp;
         }
-      } else if (registrationNameModules.hasOwnProperty(propKey)) {
+      } else if (typeof nextProp === 'function' || typeof lastProp === 'function') {
         if (nextProp) {
           enqueuePutListener(this, propKey, nextProp, transaction);
         } else if (lastProp) {
