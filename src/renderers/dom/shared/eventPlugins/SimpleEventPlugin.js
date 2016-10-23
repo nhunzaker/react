@@ -44,7 +44,6 @@ import type {
 } from 'PluginModuleType';
 
 var eventTypes: EventTypes = {};
-var topLevelEventsToDispatchConfig: {[key: TopLevelTypes]: DispatchConfig} = {};
 
 function findOrCreateDispatchConfig (topLevelType) {
   var eventName = EventPluginRegistry.getEventType(topLevelType);
@@ -53,7 +52,6 @@ function findOrCreateDispatchConfig (topLevelType) {
     var type = EventPluginRegistry.findOrCreateDispatchConfig(topLevelType);
 
     eventTypes[eventName] = type;
-    topLevelEventsToDispatchConfig[topLevelType] = type;
   }
 
   return eventTypes[eventName];
@@ -62,7 +60,7 @@ function findOrCreateDispatchConfig (topLevelType) {
 // We need click to greedily "put" click handlers. See didPutListener
 findOrCreateDispatchConfig('topClick');
 
-// We need doubleclick ahead of time for warnings about dblclick
+// We need doubleclick ahead of time to warn about about dblclick.
 findOrCreateDispatchConfig('topDoubleClick');
 
 var onClickListeners = {};
@@ -95,7 +93,7 @@ function shouldPreventMouseEvent(inst) {
 function eventIsRegisteredByOtherPlugin (topLevelType) {
   var eventName = EventPluginRegistry.getEventType(topLevelType);
 
-  return !topLevelEventsToDispatchConfig[topLevelType] &&
+  return !eventTypes[eventName] &&
          EventPluginRegistry.eventNameDispatchConfigs[eventName]
 }
 
