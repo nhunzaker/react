@@ -975,7 +975,7 @@ ReactDOMComponent.Mixin = {
         deleteListener(this, propKey);
       } else if (isCustomComponentTag) {
         if (DOMProperty.isReservedProp(propKey) === false) {
-          DOMPropertyOperations.deleteValueForAttribute(getNode(this),propKey);
+          DOMPropertyOperations.deleteValueForAttribute(getNode(this), propKey);
         }
       } else {
         DOMPropertyOperations.deleteValueForProperty(getNode(this), propKey);
