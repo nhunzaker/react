@@ -11,6 +11,7 @@
 
 'use strict';
 
+var EventConstants = require('EventConstants');
 var DOMProperty = require('DOMProperty');
 var EventPluginRegistry = require('EventPluginRegistry');
 var ReactComponentTreeHook = require('ReactComponentTreeHook');
@@ -137,6 +138,14 @@ if (__DEV__) {
     DOMProperty.getPossibleStandardName[name.toLowerCase()] = name;
   });
 
+  Object.keys(EventConstants.topLevelTypes).forEach(function (topLevelType) {
+    var bubbleName = topLevelType.replace(/^top/, 'on');
+    var captureName = bubbleName + 'Capture';
+
+    EventPluginRegistry.possibleRegistrationNames[bubbleName.toLowerCase()] = bubbleName;
+    EventPluginRegistry.possibleRegistrationNames[captureName.toLowerCase()] = captureName;
+  });
+
   var warnedProperties = {};
 
   var validateProperty = function(tagName, name, debugID) {
@@ -150,8 +159,14 @@ if (__DEV__) {
     if (EventPluginRegistry.registrationNameModules.hasOwnProperty(name)) {
       return true;
     }
+
     warnedProperties[name] = true;
+
     var lowerCasedName = name.toLowerCase();
+    var correctEventName = EventPluginRegistry.possibleRegistrationNames[lowerCasedName];
+    if (correctEventName !== null && correctEventName === name) {
+      return true;
+    }
 
     var standardName = DOMProperty.getPossibleStandardName.hasOwnProperty(name) ?
         DOMProperty.getPossibleStandardName[name] : null;

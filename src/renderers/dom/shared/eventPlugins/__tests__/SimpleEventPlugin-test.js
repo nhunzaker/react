@@ -152,4 +152,103 @@ describe('SimpleEventPlugin', function() {
       expect(onClick.mock.calls.length).toBe(0);
     });
   });
+
+  describe('Custom Events', () => {
+
+    it('dispatches custom events directly on elements', () => {
+      var callback = jest.fn();
+
+      // Custom events won't trigger unless the container element
+      // is attached to the DOM. Why?
+      var container = document.createElement('div');
+
+      document.body.appendChild(container);
+
+      // Use a custom component to avoid warnings about unknown props
+      var el = ReactDOM.render(<button onCustom={callback} />, container);
+      var event = new CustomEvent('custom', { bubbles: true });
+
+      el.dispatchEvent(event);
+
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('captures custom events on parents', () => {
+      var callback = jest.fn();
+      var container = document.createElement('div');
+
+      document.body.appendChild(container);
+
+      var el = ReactDOM.render((
+        <div onCustomCapture={() => callback('capture')}>
+          <button onCustom={() => callback('bubble')}/>
+        </div>
+      ), container);
+
+      var event = new CustomEvent('custom', { bubbles: true });
+
+      el.querySelector('button').dispatchEvent(event);
+
+      var sequence = callback.mock.calls.map(args => args[0]);
+
+      expect(sequence).toEqual(['capture', 'bubble']);
+    });
+
+    it('bubbles custom events to parents', () => {
+      var callback = jest.fn();
+      var container = document.createElement('div');
+
+      document.body.appendChild(container);
+
+      var el = ReactDOM.render((
+        <div onCustom={callback}>
+          <button />
+        </div>
+      ), container);
+
+      var event = new CustomEvent('custom', { bubbles: true });
+
+      el.querySelector('button').dispatchEvent(event);
+
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('custom events can be simulated', () => {
+      var callback = jest.fn();
+
+      var el = ReactTestUtils.renderIntoDocument(<div onCustom={callback}/>);
+
+      ReactTestUtils.Simulate('custom', el);
+
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('simulated custom events bubble', () => {
+      var callback = jest.fn();
+
+      var el = ReactTestUtils.renderIntoDocument(<div onCustom={callback}><button /></div>);
+
+      ReactTestUtils.Simulate('custom', el.querySelector('button'));
+
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('simulated custom events capture', () => {
+      var callback = jest.fn();
+
+      var el = ReactTestUtils.renderIntoDocument((
+        <div onCustomCapture={() => callback('capture')}>
+          <button onCustom={() => callback('bubble')} />
+        </div>
+      ));
+
+      ReactTestUtils.Simulate('custom', el.querySelector('button'));
+
+      var sequence = callback.mock.calls.map(args => args[0]);
+
+      expect(sequence).toEqual(['capture', 'bubble']);
+    });
+
+  });
+
 });

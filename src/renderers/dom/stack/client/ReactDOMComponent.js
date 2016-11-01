@@ -20,7 +20,6 @@ var DOMNamespaces = require('DOMNamespaces');
 var DOMProperty = require('DOMProperty');
 var DOMPropertyOperations = require('DOMPropertyOperations');
 var EventPluginHub = require('EventPluginHub');
-var EventPluginRegistry = require('EventPluginRegistry');
 var ReactBrowserEventEmitter = require('ReactBrowserEventEmitter');
 var ReactDOMComponentFlags = require('ReactDOMComponentFlags');
 var ReactDOMComponentTree = require('ReactDOMComponentTree');
@@ -46,7 +45,6 @@ var Flags = ReactDOMComponentFlags;
 var deleteListener = EventPluginHub.deleteListener;
 var getNode = ReactDOMComponentTree.getNodeFromInstance;
 var listenTo = ReactBrowserEventEmitter.listenTo;
-var registrationNameModules = EventPluginRegistry.registrationNameModules;
 
 // For quickly matching children type, to test if can be treated as content.
 var CONTENT_TYPES = {'string': true, 'number': true};
@@ -733,10 +731,8 @@ ReactDOMComponent.Mixin = {
       }
       var propValue = props[propKey];
 
-      if (registrationNameModules.hasOwnProperty(propKey)) {
-        if (propValue) {
-          enqueuePutListener(this, propKey, propValue, transaction);
-        }
+      if (typeof propValue ==='function') {
+        enqueuePutListener(this, propKey, propValue, transaction);
       } else {
         if (propKey === STYLE) {
           if (propValue) {
@@ -975,12 +971,11 @@ ReactDOMComponent.Mixin = {
           }
         }
         this._previousStyleCopy = null;
-      } else if (registrationNameModules.hasOwnProperty(propKey)) {
-        if (lastProps[propKey]) {
-          // Only call deleteListener if there was a listener previously or
-          // else willDeleteListener gets called when there wasn't actually a
-          // listener (e.g., onClick={null})
-          deleteListener(this, propKey);
+      } else if (typeof lastProps[propKey] === 'function') {
+        deleteListener(this, propKey);
+      } else if (isCustomComponentTag) {
+        if (DOMProperty.isReservedProp(propKey) === false) {
+          DOMPropertyOperations.deleteValueForAttribute(getNode(this), propKey);
         }
       } else {
         DOMPropertyOperations.deleteValueForProperty(getNode(this), propKey);
@@ -1032,7 +1027,7 @@ ReactDOMComponent.Mixin = {
           // Relies on `updateStylesByID` not mutating `styleUpdates`.
           styleUpdates = nextProp;
         }
-      } else if (registrationNameModules.hasOwnProperty(propKey)) {
+      } else if (typeof nextProp === 'function' || typeof lastProp === 'function') {
         if (nextProp) {
           enqueuePutListener(this, propKey, nextProp, transaction);
         } else if (lastProp) {

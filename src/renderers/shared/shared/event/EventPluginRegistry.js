@@ -201,6 +201,50 @@ var EventPluginRegistry = {
   // Trust the developer to only use possibleRegistrationNames in __DEV__
 
   /**
+   * Convert a top level event name into a standard event name
+   */
+  getEventType: function(topLevelType) {
+    var base = topLevelType.replace(/^top/, '');
+
+    return base[0].toLowerCase() + base.slice(1);
+  },
+
+  /**
+   * Convert an event type into a top level type
+   */
+  getTopLevelType: function(eventType) {
+    var upper = eventType[0].toUpperCase() + eventType.slice(1);
+
+    return 'top' + upper;
+  },
+
+  /**
+   * Build the phased registration names for a top level event.
+   */
+  getPhases: function(topLevelType) {
+    var base = topLevelType.replace(/^top/, '');
+
+    return {
+      bubbled  : 'on' + base,
+      captured : 'on' + base + 'Capture',
+    };
+  },
+
+  findOrCreateDispatchConfig: function(topLevelType) {
+    var eventName = EventPluginRegistry.getEventType(topLevelType);
+    var dispatchConfig = EventPluginRegistry.eventNameDispatchConfigs[eventName];
+
+    if (dispatchConfig == null) {
+      dispatchConfig = {
+        phasedRegistrationNames: EventPluginRegistry.getPhases(topLevelType),
+        dependencies: [topLevelType],
+      };
+    }
+
+    return dispatchConfig;
+  },
+
+  /**
    * Injects an ordering of plugins (by plugin name). This allows the ordering
    * to be decoupled from injection of the actual plugins so that ordering is
    * always deterministic regardless of packaging, on-the-fly injection, etc.
