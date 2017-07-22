@@ -7,6 +7,7 @@ import InputChangeEvents from './input-change-events';
 import NumberInputFixtures from './number-inputs';
 import PasswordInputFixtures from './password-inputs';
 import ButtonFixtures from './buttons';
+import EventPooling from './event-pooling';
 
 /**
  * A simple routing component that renders the appropriate
@@ -30,6 +31,8 @@ function FixturesPage() {
       return <PasswordInputFixtures />;
     case '/buttons':
       return <ButtonFixtures />;
+    case '/event-pooling':
+      return <EventPooling />;
     default:
       return <p>Please select a test fixture.</p>;
   }
