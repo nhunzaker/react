@@ -14,6 +14,26 @@ import MediaEventsFixtures from './media-events';
 
 const React = window.React;
 
+class Field extends React.Component {
+  state = {value: '', last: 'UNRECORDED'};
+
+  onChange = event => {
+    this.setState({
+      value: event.target.value || '',
+      last: event.target === window ? 'WINDOW' : event.target.tagName,
+    });
+  };
+
+  render() {
+    return (
+      <div>
+        <input value={this.state.value} onChange={this.onChange} />
+        <div>Last target was {this.state.last}</div>
+      </div>
+    );
+  }
+}
+
 /**
  * A simple routing component that renders the appropriate
  * fixture based on the location pathname.
@@ -47,7 +67,19 @@ function FixturesPage() {
     case '/media-events':
       return <MediaEventsFixtures />;
     default:
-      return <p>Please select a test fixture.</p>;
+      return (
+        <div>
+          <h1>IE9 Input Target Issue</h1>
+          <ol>
+            <li>Open this page in IE9</li>
+            <li>Type into the textbox below</li>
+            <li>The target is the window. Why?</li>
+          </ol>
+          <fieldset>
+            <Field />
+          </fieldset>
+        </div>
+      );
   }
 }
 
