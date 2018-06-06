@@ -29,7 +29,7 @@ import {
   TOP_SUBMIT,
   TOP_TOGGLE,
 } from '../events/DOMTopLevelEventTypes';
-import {listenTo, trapEvent} from '../events/ReactBrowserEventEmitter';
+import {listenTo} from '../events/ReactBrowserEventEmitter';
 import * as CSSPropertyOperations from '../shared/CSSPropertyOperations';
 import {Namespaces, getIntrinsicNamespace} from '../shared/DOMNamespaces';
 import {
@@ -213,16 +213,6 @@ if (__DEV__) {
   };
 }
 
-function ensureListeningTo(rootContainerElement, registrationName) {
-  const isDocumentOrFragment =
-    rootContainerElement.nodeType === DOCUMENT_NODE ||
-    rootContainerElement.nodeType === DOCUMENT_FRAGMENT_NODE;
-  const doc = isDocumentOrFragment
-    ? rootContainerElement
-    : rootContainerElement.ownerDocument;
-  listenTo(registrationName, doc);
-}
-
 function getOwnerDocumentFromRootContainer(
   rootContainerElement: Element | Document,
 ): Document {
@@ -297,7 +287,7 @@ function setInitialDOMProperties(
         if (__DEV__ && typeof nextProp !== 'function') {
           warnForInvalidEventListener(propKey, nextProp);
         }
-        ensureListeningTo(rootContainerElement, propKey);
+        listenTo(propKey, rootContainerElement)
       }
     } else if (nextProp != null) {
       DOMPropertyOperations.setValueForProperty(
@@ -449,34 +439,12 @@ export function setInitialProperties(
   // TODO: Make sure that we check isMounted before firing any of these events.
   let props: Object;
   switch (tag) {
-    case 'iframe':
-    case 'object':
-      trapEvent(TOP_LOAD, domElement);
-      props = rawProps;
-      break;
-    case 'img':
-    case 'image':
-    case 'link':
-      trapEvent(TOP_ERROR, domElement);
-      trapEvent(TOP_LOAD, domElement);
-      props = rawProps;
-      break;
-    case 'form':
-      trapEvent(TOP_RESET, domElement);
-      trapEvent(TOP_SUBMIT, domElement);
-      props = rawProps;
-      break;
-    case 'details':
-      trapEvent(TOP_TOGGLE, domElement);
-      props = rawProps;
-      break;
     case 'input':
       ReactDOMFiberInput.initWrapperState(domElement, rawProps);
       props = ReactDOMFiberInput.getHostProps(domElement, rawProps);
-      trapEvent(TOP_INVALID, domElement);
       // For controlled components we always need to ensure we're listening
       // to onChange. Even if there is no listener.
-      ensureListeningTo(rootContainerElement, 'onChange');
+      listenTo('onChange', rootContainerElement)
       break;
     case 'option':
       ReactDOMFiberOption.validateProps(domElement, rawProps);
@@ -485,18 +453,16 @@ export function setInitialProperties(
     case 'select':
       ReactDOMFiberSelect.initWrapperState(domElement, rawProps);
       props = ReactDOMFiberSelect.getHostProps(domElement, rawProps);
-      trapEvent(TOP_INVALID, domElement);
       // For controlled components we always need to ensure we're listening
       // to onChange. Even if there is no listener.
-      ensureListeningTo(rootContainerElement, 'onChange');
+      listenTo('onChange', rootContainerElement)
       break;
     case 'textarea':
       ReactDOMFiberTextarea.initWrapperState(domElement, rawProps);
       props = ReactDOMFiberTextarea.getHostProps(domElement, rawProps);
-      trapEvent(TOP_INVALID, domElement);
       // For controlled components we always need to ensure we're listening
       // to onChange. Even if there is no listener.
-      ensureListeningTo(rootContainerElement, 'onChange');
+      listenTo('onChange', rootContainerElement)
       break;
     default:
       props = rawProps;
@@ -717,7 +683,7 @@ export function diffProperties(
         if (__DEV__ && typeof nextProp !== 'function') {
           warnForInvalidEventListener(propKey, nextProp);
         }
-        ensureListeningTo(rootContainerElement, propKey);
+        listenTo(propKey, rootContainerElement);
       }
       if (!updatePayload && lastProp !== nextProp) {
         // This is a special case. If any listener updates we need to ensure
@@ -828,49 +794,26 @@ export function diffHydratedProperties(
 
   // TODO: Make sure that we check isMounted before firing any of these events.
   switch (tag) {
-    case 'iframe':
-    case 'object':
-      trapEvent(TOP_LOAD, domElement);
-      break;
-    case 'source':
-      trapEvent(TOP_ERROR, domElement);
-      break;
-    case 'img':
-    case 'image':
-    case 'link':
-      trapEvent(TOP_ERROR, domElement);
-      trapEvent(TOP_LOAD, domElement);
-      break;
-    case 'form':
-      trapEvent(TOP_RESET, domElement);
-      trapEvent(TOP_SUBMIT, domElement);
-      break;
-    case 'details':
-      trapEvent(TOP_TOGGLE, domElement);
-      break;
     case 'input':
       ReactDOMFiberInput.initWrapperState(domElement, rawProps);
-      trapEvent(TOP_INVALID, domElement);
       // For controlled components we always need to ensure we're listening
       // to onChange. Even if there is no listener.
-      ensureListeningTo(rootContainerElement, 'onChange');
+      listenTo('onChange', rootContainerElement);
       break;
     case 'option':
       ReactDOMFiberOption.validateProps(domElement, rawProps);
       break;
     case 'select':
       ReactDOMFiberSelect.initWrapperState(domElement, rawProps);
-      trapEvent(TOP_INVALID, domElement);
       // For controlled components we always need to ensure we're listening
       // to onChange. Even if there is no listener.
-      ensureListeningTo(rootContainerElement, 'onChange');
+      listenTo('onChange', rootContainerElement);
       break;
     case 'textarea':
       ReactDOMFiberTextarea.initWrapperState(domElement, rawProps);
-      trapEvent(TOP_INVALID, domElement);
       // For controlled components we always need to ensure we're listening
       // to onChange. Even if there is no listener.
-      ensureListeningTo(rootContainerElement, 'onChange');
+      listenTo('onChange', rootContainerElement);
       break;
   }
 
@@ -937,7 +880,7 @@ export function diffHydratedProperties(
         if (__DEV__ && typeof nextProp !== 'function') {
           warnForInvalidEventListener(propKey, nextProp);
         }
-        ensureListeningTo(rootContainerElement, propKey);
+        listenTo(propKey, rootContainerElement);
       }
     } else if (
       __DEV__ &&
