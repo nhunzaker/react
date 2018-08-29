@@ -2,7 +2,7 @@ import Fixture from '../../Fixture';
 
 const React = window.React;
 
-class PasswordTestCase extends React.Component {
+class PasswordIconTestCase extends React.Component {
   state = {value: ''};
   onChange = event => {
     this.setState({value: event.target.value});
@@ -36,4 +36,4 @@ class PasswordTestCase extends React.Component {
   }
 }
 
-export default PasswordTestCase;
+export default PasswordIconTestCase;

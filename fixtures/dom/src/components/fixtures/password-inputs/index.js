@@ -1,10 +1,11 @@
 import FixtureSet from '../../FixtureSet';
 import TestCase from '../../TestCase';
-import PasswordTestCase from './PasswordTestCase';
+import PasswordIconTestCase from './PasswordIconTestCase';
+import PasswordRememberTestCase from './PasswordRememberTestCase';
 
 const React = window.React;
 
-function NumberInputs() {
+function PasswordInputs() {
   return (
     <FixtureSet title="Password inputs">
       <TestCase
@@ -22,10 +23,28 @@ function NumberInputs() {
           The field should include the "unmasking password" icon.
         </TestCase.ExpectedResult>
 
-        <PasswordTestCase />
+        <PasswordIconTestCase />
+      </TestCase>
+
+      <TestCase
+        title="Remember submitted passwords"
+        description=""
+        affectedBrowsers="IE Edge, IE 11">
+        <TestCase.Steps>
+          <li>Fill in the form inputs below</li>
+          <li>Submit</li>
+          <li>You should see a browser dialog to ask to remember the password</li>
+        </TestCase.Steps>
+
+        <TestCase.ExpectedResult>
+          The username field should remember the user, and autopopulate the
+          password.
+        </TestCase.ExpectedResult>
+
+        <PasswordRememberTestCase />
       </TestCase>
     </FixtureSet>
   );
 }
 
-export default NumberInputs;
+export default PasswordInputs;
